@@ -1,1 +1,27 @@
-node_modules\ndist
+# Dependencias y paquetes de Node.js
+/node_modules
+
+# Directorio de build (si lo usaras en el futuro)
+/dist
+
+# Archivos de log de npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
