@@ -17,7 +17,15 @@
       <button class="apps-button" aria-label="Aplicaciones de Google">
         <span class="material-icons">apps</span>
       </button>
-      <button class="signin-button" data-i18n="signin">Iniciar sesión</button>
+      <button id="login-button" class="signin-button" data-i18n="signin">Iniciar sesión</button>
+      <div id="user-menu" class="user-menu" style="display: none;">
+        <img id="user-avatar" src="" alt="User Avatar" class="avatar">
+        <div class="user-info">
+          <p id="user-name"></p>
+          <p id="user-email"></p>
+          <button id="logout-button" data-i18n="signout">Cerrar Sesión</button>
+        </div>
+      </div>
     </div>
   </nav>
   <!-- Contenedor principal: logo, barra de búsqueda y botones -->

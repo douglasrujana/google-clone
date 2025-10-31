@@ -1,5 +1,13 @@
 import { setDynamicYear } from './utils.js';
 import { initI18n } from './i18n.js';
+import { updateCurrentYear } from './utils.js';
+import { initAuth } from './auth.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  initI18n();
+  updateCurrentYear();
+  initAuth();
+});
 
 /**
  * @description

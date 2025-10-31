@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Authenticating...</title>
+</head>
+<body>
+    <p>Please wait, authenticating...</p>
+    <script>
+        (async () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+
+            if (code) {
+                try {
+                    const response = await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ code }),
+                    });
+
+                    if (!response.ok) {
+                        const errorDetails = await response.json();
+                        throw new Error(`Failed to exchange code for token: ${errorDetails.details || response.statusText}`);
+                    }
+
+                    const user = await response.json();
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = '/'; // Redirect to home page
+                } catch (error) {
+                    console.error('Authentication failed:', error);
+                    alert('Authentication failed. Please try again.');
+                    window.location.href = '/'; // Redirect to home page on error
+                }
+            } else {
+                alert('No authorization code found.');
+                window.location.href = '/'; // Redirect to home page
+            }
+        })();
+    </script>
+</body>
+</html>
