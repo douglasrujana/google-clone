@@ -13,7 +13,7 @@ const updateContent = () => {
       const realKey = attributeMatch[2];
       element.setAttribute(attr, i18next.t(realKey));
     } else {
-      element.innerHTML = i18next.t(key);
+      element.textContent = i18next.t(key);
     }
   });
   document.title = i18next.t('title');
@@ -30,7 +30,7 @@ export const initI18n = async () => {
       debug: true,
       backend: {
         // Ruta donde están los archivos de traducción
-        loadPath: '/assets/locales/{{lng}}/translation.json',
+        loadPath: '/locales/{{lng}}/translation.json',
       },
       detection: {
         // El orden importa. Priorizamos la configuración del navegador.
