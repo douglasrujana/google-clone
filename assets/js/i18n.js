@@ -37,6 +37,8 @@ export const initI18n = async () => {
         order: ['navigator', 'htmlTag', 'querystring', 'cookie', 'localStorage', 'sessionStorage'],
         // Limpiar cualquier valor guardado en ejecuciones anteriores.
         caches: [],
+        // Cargar solo el idioma base (ej. 'es' en lugar de 'es-ES')
+        load: 'languageOnly',
       },
       interpolation: {
         escapeValue: false,
