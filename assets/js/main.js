@@ -1,13 +1,6 @@
-import { setDynamicYear } from './utils.js';
-import { initI18n } from './i18n.js';
-import { updateCurrentYear } from './utils.js';
-import { initAuth } from './auth.js';
-
-document.addEventListener('DOMContentLoaded', () => {
-  initI18n();
-  updateCurrentYear();
-  initAuth();
-});
+import { initI18n } from '/assets/js/i18n.js';
+import { setDynamicYear } from '/assets/js/utils.js';
+import { initAuth } from '/assets/js/auth.js';
 
 /**
  * @description
@@ -26,9 +19,12 @@ function populateSearchFromQuery() {
 }
 
 const main = async () => {
+  // Llama a todas las funciones de inicialización aquí
   setDynamicYear('current-year');
   await initI18n();
+  initAuth();
   populateSearchFromQuery();
 };
 
+// Un único punto de entrada cuando el DOM está listo
 window.addEventListener('DOMContentLoaded', main);

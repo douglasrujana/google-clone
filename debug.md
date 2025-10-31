@@ -1,9 +1,17 @@
-index-C-Edy3bQ.js:1 i18next::backendConnector: loaded namespace translation for language es Object
-index-C-Edy3bQ.js:1 i18next::backendConnector: loaded namespace translation for language en Object
-hook.js:608 i18next::backendConnector: loading namespace translation for language es-ES failed failed loading /locales/es-ES/translation.json; status code: 404
-overrideMethod @ hook.js:608
-index-C-Edy3bQ.js:1 i18next: languageChanged es-ES
-index-C-Edy3bQ.js:1 i18next: initialized Object
-index-C-Edy3bQ.js:1 i18next::translator: missingKey es-ES translation gmail gmail
-index-C-Edy3bQ.js:1 i18next::translator: missingKey es-ES translation images images
-index-C-Edy3bQ.js:1 i18next::translator: missingKey es-ES translation signin signin
+VITE v7.1.12  ready in 275 ms
+
+  ➜  Local:   <http://localhost:5173/>
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+--- [LOG DE AUTENTICACIÓN] ---
+[3:59:36 a. m.] Petición recibida en /api/auth
+[INFO] Código de autorización recibido.
+[INFO] Intercambiando código por token con Google...
+[INFO] id_token de Google recibido con éxito.
+[INFO] Verificando id_token con Google...
+✅ ¡ÉXITO! Token de Google verificado correctamente.
+   -> Usuario: Labx
+   -> Email: <drrclabx@gmail.com>
+[INFO] Creando y enviando token JWT para la aplicación.
+--- [FIN DEL LOG] ---

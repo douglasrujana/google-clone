@@ -7,7 +7,7 @@ const updateContent = () => {
   document.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.dataset.i18n;
     // Regex mejorado para manejar atributos como [placeholder]key
-    const attributeMatch = key.match(/^\[(.*?)\](.*)$/);
+    const attributeMatch = key.match(/^\\[(.*?)\\](.*)$/);
     if (attributeMatch) {
       const attr = attributeMatch[1];
       const realKey = attributeMatch[2];
@@ -26,7 +26,12 @@ export const initI18n = async () => {
     .use(i18nextBrowserLanguageDetector)
     .use(i18nextHttpBackend)
     .init({
-      fallbackLng: 'en',
+      fallbackLng: {
+        // Si el navegador pide 'es-ES', intenta cargar 'es' y luego 'en' si falla.
+        'es-ES': ['es', 'en'],
+        // Para cualquier otro idioma, el fallback por defecto es 'en'.
+        'default': ['en']
+      },
       debug: true,
       backend: {
         // Ruta donde están los archivos de traducción
@@ -37,8 +42,6 @@ export const initI18n = async () => {
         order: ['navigator', 'htmlTag', 'querystring', 'cookie', 'localStorage', 'sessionStorage'],
         // Limpiar cualquier valor guardado en ejecuciones anteriores.
         caches: [],
-        // Cargar solo el idioma base (ej. 'es' en lugar de 'es-ES')
-        load: 'languageOnly',
       },
       interpolation: {
         escapeValue: false,

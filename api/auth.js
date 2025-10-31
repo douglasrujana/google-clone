@@ -1,69 +1,96 @@
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
 
+const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const JWT_SECRET = 'your_super_secret_jwt_key'; // ¡Cambia esto por una clave segura!
+
+const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, 'http://localhost:5173/auth/callback.html');
+
+export default async function handler(req, res) {
+  // --- INICIO DEL LOG ---
+  console.log('\n\n--- [LOG DE AUTENTICACIÓN] ---');
+  console.log(`[${new Date().toLocaleTimeString()}] Petición recibida en /api/auth`);
+
+  if (req.method !== 'POST') {
+    console.log('[ERROR] Método no permitido. Se esperaba POST.');
+    res.statusCode = 405;
+    res.setHeader('Allow', 'POST');
+    res.end('Method Not Allowed');
+    return;
+  }
+
+  try {
     const { code } = req.body;
 
     if (!code) {
-        return res.status(400).json({ error: 'Authorization code is missing' });
+      console.log('[ERROR] Código de autorización no encontrado en el cuerpo de la petición.');
+      res.statusCode = 400;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: 'Authorization code is missing' }));
+      return;
+    }
+    console.log('[INFO] Código de autorización recibido.');
+
+    // Intercambia el código de autorización por tokens
+    console.log('[INFO] Intercambiando código por token con Google...');
+    const { tokens } = await client.getToken(code);
+    const idToken = tokens.id_token;
+
+    if (!idToken) {
+      console.log('[ERROR] Google no devolvió un id_token.');
+      res.statusCode = 401;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: 'Failed to retrieve ID token from Google' }));
+      return;
+    }
+    console.log('[INFO] id_token de Google recibido con éxito.');
+
+    // Verifica el token de ID de Google
+    console.log('[INFO] Verificando id_token con Google...');
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+        console.log('[ERROR] El payload del token de Google es inválido.');
+        res.statusCode = 401;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'Invalid Google token' }));
+        return;
     }
 
-    const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    
-    // Dynamically construct the redirect URI based on the environment.
-    const redirectUri = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}/auth/callback.html`
-        : 'http://localhost:5173/auth/callback.html';
+    // --- LOG DE ÉXITO ---
+    console.log('✅ ¡ÉXITO! Token de Google verificado correctamente.');
+    console.log(`   -> Usuario: ${payload.name}`);
+    console.log(`   -> Email: ${payload.email}`);
 
-    try {
-        // 1. Exchange authorization code for access token
-        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                code,
-                client_id: clientId,
-                client_secret: clientSecret,
-                redirect_uri: redirectUri,
-                grant_type: 'authorization_code',
-            }),
-        });
+    // Crea un token JWT para tu propia aplicación
+    const appTokenPayload = {
+      userId: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+    };
 
-        const tokenData = await tokenResponse.json();
+    const token = jwt.sign(appTokenPayload, JWT_SECRET, { expiresIn: '1h' });
+    console.log('[INFO] Creando y enviando token JWT para la aplicación.');
 
-        if (tokenData.error) {
-            console.error('Error from Google token endpoint:', tokenData.error_description);
-            return res.status(400).json({ error: 'Failed to exchange code for token', details: tokenData.error_description });
-        }
+    // Envía el token JWT al cliente
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ token }));
+    console.log('--- [FIN DEL LOG] ---\n');
 
-        const accessToken = tokenData.access_token;
-
-        // 2. Use access token to get user info
-        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
-
-        const userData = await userResponse.json();
-
-        if (!userResponse.ok) {
-            return res.status(userResponse.status).json({ error: 'Failed to fetch user info' });
-        }
-
-        // 3. Send user data back to the client
-        res.status(200).json({
-            name: userData.name,
-            email: userData.email,
-            avatar: userData.picture,
-        });
-
-    } catch (error) {
-        console.error('Internal server error during auth:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+  } catch (error) {
+    console.error('🚨 --- [ERROR EN AUTENTICACIÓN] --- 🚨');
+    console.error(error);
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    console.log('--- [FIN DEL LOG CON ERROR] ---\n');
+  }
 }
